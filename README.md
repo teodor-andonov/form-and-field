@@ -22,10 +22,11 @@ Gallery: search, category filters, reverse sorting, thumbnails, previous/next an
 
 Graphicpad: choose Pen to draw, Select / move to click near a stroke and drag it, use Delete to remove a selected stroke, Undo for the last stroke, middle-drag to pan, scroll or buttons to zoom. Pen pressure influences the width at the start of a stroke where the platform reports a pressure range; pressure is not continuously interpolated. The canvas has no persistence, export, redo, shape editing, multitouch pan, or advanced smoothing.
 
-Architecture: sliders regenerate cuboid geometry; material chips recolor the pavilion. Drag to orbit and scroll to zoom. Studio environment lighting comes from Flutter Scene. There is no object picking, pan, editable individual components, save/export, or touch-specific pinch zoom. This is a simple massing study rather than a full architectural CAD tool. GPU/WebGL2 support depends on the device and browser. Scene's native rendering depends on Flutter GPU support.
+Architecture: sliders regenerate cuboid geometry; material chips recolor the pavilion. Drag to orbit; pinch, scroll, or use the zoom buttons to zoom. Studio environment lighting comes from Flutter Scene. There is no object picking, pan, editable individual components, or save/export. This is a simple massing study rather than a full architectural CAD tool. GPU/WebGL2 support depends on the device and browser. Scene's native rendering depends on Flutter GPU support.
 
 State is in memory and is lost on reload or route changes. This is an experiment, not a production-ready editor. No visual or interactive testing was performed.
 
 
 GitHub Actions deploys the main branch to GitHub Pages using the project base path /form-and-field/.
+
 

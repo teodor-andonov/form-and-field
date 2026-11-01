@@ -93,7 +93,9 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext c) => Container(
     height: 72,
-    padding: const EdgeInsets.symmetric(horizontal: 24),
+    padding: EdgeInsets.symmetric(
+      horizontal: MediaQuery.sizeOf(c).width < 400 ? 12 : 24,
+    ),
     decoration: const BoxDecoration(
       color: paper,
       border: Border(bottom: BorderSide(color: Color(0xffd9ded4))),
@@ -133,7 +135,9 @@ class Header extends StatelessWidget {
             backgroundColor: ink,
             foregroundColor: Colors.white,
           ),
-          child: const Text('Explore apps  ↗'),
+          child: Text(
+            MediaQuery.sizeOf(c).width < 400 ? 'Apps ↗' : 'Explore apps  ↗',
+          ),
         ),
       ],
     ),
@@ -770,99 +774,118 @@ class _GraphicPadState extends State<GraphicPad> {
   Widget build(BuildContext c) => Column(
     children: [
       Container(
-        padding: const EdgeInsets.all(10),
         color: Colors.white,
-        child: Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Column(
           children: [
-            const SizedBox(width: 8),
-            const Text(
-              'GRAPHICPAD',
-              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
-            ),
-            const SizedBox(width: 12),
-            ChoiceChip(
-              label: const Text('Pen'),
-              selected: !select,
-              onSelected: (_) => setState(() => select = false),
-            ),
-            ChoiceChip(
-              label: const Text('Select / move'),
-              selected: select,
-              onSelected: (_) => setState(() => select = true),
-            ),
-            for (final col in [
-              ink,
-              const Color(0xffdf755b),
-              const Color(0xff668e81),
-              const Color(0xffc1a84d),
-            ])
-              InkWell(
-                onTap: () => setState(() => color = col),
-                child: Container(
-                  width: 23,
-                  height: 23,
-                  decoration: BoxDecoration(
-                    color: col,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: color == col ? Colors.black : Colors.transparent,
-                      width: 2,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      'GRAPHICPAD',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
-                ),
+                  ChoiceChip(
+                    label: const Text('Pen'),
+                    selected: !select,
+                    onSelected: (_) => setState(() => select = false),
+                  ),
+                  const SizedBox(width: 6),
+                  ChoiceChip(
+                    label: const Text('Select / move'),
+                    selected: select,
+                    onSelected: (_) => setState(() => select = true),
+                  ),
+                  IconButton(
+                    tooltip: 'Undo last stroke',
+                    onPressed: () => setState(() {
+                      if (strokes.isNotEmpty) strokes.removeLast();
+                      selected = null;
+                    }),
+                    icon: const Icon(Icons.undo),
+                  ),
+                  IconButton(
+                    tooltip: 'Delete selection',
+                    onPressed: () => setState(() {
+                      if (selected != null) {
+                        strokes.removeAt(selected!);
+                        selected = null;
+                      }
+                    }),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ],
               ),
-            SizedBox(
-              width: 110,
-              child: Slider(
-                value: width,
-                min: 1,
-                max: 14,
-                onChanged: (v) => setState(() => width = v),
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final col in [
+                    ink,
+                    const Color(0xffdf755b),
+                    const Color(0xff668e81),
+                    const Color(0xffc1a84d),
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: InkWell(
+                        onTap: () => setState(() => color = col),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: col,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: color == col
+                                  ? Colors.black
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(
+                    width: 100,
+                    child: Slider(
+                      value: width,
+                      min: 1,
+                      max: 14,
+                      onChanged: (v) => setState(() => width = v),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Zoom out',
+                    onPressed: () =>
+                        setState(() => zoom = (zoom / 1.2).clamp(.3, 4)),
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Text('${(zoom * 100).round()}%'),
+                  IconButton(
+                    tooltip: 'Zoom in',
+                    onPressed: () =>
+                        setState(() => zoom = (zoom * 1.2).clamp(.3, 4)),
+                    icon: const Icon(Icons.add),
+                  ),
+                  IconButton(
+                    tooltip: 'Reset view',
+                    onPressed: () => setState(() {
+                      zoom = 1;
+                      pan = Offset.zero;
+                    }),
+                    icon: const Icon(Icons.center_focus_strong),
+                  ),
+                ],
               ),
-            ),
-            IconButton(
-              tooltip: 'Undo last stroke',
-              onPressed: () => setState(() {
-                if (strokes.isNotEmpty) strokes.removeLast();
-                selected = null;
-              }),
-              icon: const Icon(Icons.undo),
-            ),
-            IconButton(
-              tooltip: 'Delete selection',
-              onPressed: () => setState(() {
-                if (selected != null) {
-                  strokes.removeAt(selected!);
-                  selected = null;
-                }
-              }),
-              icon: const Icon(Icons.delete_outline),
-            ),
-            IconButton(
-              tooltip: 'Zoom out',
-              onPressed: () => setState(() => zoom = (zoom / 1.2).clamp(.3, 4)),
-              icon: const Icon(Icons.remove),
-            ),
-            Text('${(zoom * 100).round()}%'),
-            IconButton(
-              tooltip: 'Zoom in',
-              onPressed: () => setState(() => zoom = (zoom * 1.2).clamp(.3, 4)),
-              icon: const Icon(Icons.add),
-            ),
-            IconButton(
-              tooltip: 'Reset view',
-              onPressed: () => setState(() {
-                zoom = 1;
-                pan = Offset.zero;
-              }),
-              icon: const Icon(Icons.center_focus_strong),
-            ),
-            const Text(
-              'Scroll to zoom · middle drag to pan',
-              style: TextStyle(color: muted, fontSize: 12),
             ),
           ],
         ),
@@ -1019,7 +1042,8 @@ class Architecture extends StatefulWidget {
 class _ArchitectureState extends State<Architecture> {
   scene.Scene? model;
   double w = 4, d = 3, h = 3, angle = .8, elevation = .45, distance = 11;
-  Offset last = Offset.zero;
+  double gestureStartDistance = 11;
+  Offset lastFocalPoint = Offset.zero;
   int material = 0;
   @override
   void initState() {
@@ -1112,7 +1136,6 @@ class _ArchitectureState extends State<Architecture> {
   @override
   Widget build(BuildContext c) {
     final controls = Container(
-      width: 300,
       padding: const EdgeInsets.all(20),
       color: Colors.white,
       child: ListView(
@@ -1166,7 +1189,7 @@ class _ArchitectureState extends State<Architecture> {
           ),
           const SizedBox(height: 25),
           const Text(
-            'Drag to orbit · scroll to zoom',
+            'Drag to orbit · pinch or scroll to zoom',
             style: TextStyle(color: muted, fontSize: 12),
           ),
         ],
@@ -1174,50 +1197,95 @@ class _ArchitectureState extends State<Architecture> {
     );
     final viewport = Container(
       color: const Color(0xffdce3d9),
-      child: Listener(
-        onPointerSignal: (e) {
-          if (e is PointerScrollEvent) {
-            setState(
-              () => distance = (distance + e.scrollDelta.dy * .01).clamp(4, 25),
-            );
-          }
-        },
-        onPointerDown: (e) => last = e.localPosition,
-        onPointerMove: (e) {
-          final delta = e.localPosition - last;
-          last = e.localPosition;
-          setState(() {
-            angle += delta.dx * .01;
-            elevation = (elevation + delta.dy * .01).clamp(-1.2, 1.2);
-          });
-        },
-        child: model == null
-            ? const Center(child: CircularProgressIndicator())
-            : scene.SceneView(
-                model!,
-                camera: scene.PerspectiveCamera(
-                  position: vm.Vector3(
-                    math.sin(angle) * math.cos(elevation) * distance,
-                    math.sin(elevation) * distance + 1,
-                    math.cos(angle) * math.cos(elevation) * distance,
-                  ),
-                  target: vm.Vector3(0, 1, 0),
-                ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Listener(
+              onPointerSignal: (e) {
+                if (e is PointerScrollEvent) {
+                  setState(
+                    () => distance = (distance + e.scrollDelta.dy * .01).clamp(
+                      4,
+                      25,
+                    ),
+                  );
+                }
+              },
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onScaleStart: (details) {
+                  gestureStartDistance = distance;
+                  lastFocalPoint = details.localFocalPoint;
+                },
+                onScaleUpdate: (details) {
+                  final delta = details.localFocalPoint - lastFocalPoint;
+                  lastFocalPoint = details.localFocalPoint;
+                  setState(() {
+                    if (details.pointerCount == 1) {
+                      angle += delta.dx * .01;
+                      elevation = (elevation + delta.dy * .01).clamp(-1.2, 1.2);
+                    }
+                    distance = (gestureStartDistance / details.scale).clamp(
+                      4,
+                      25,
+                    );
+                  });
+                },
+                child: model == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : scene.SceneView(
+                        model!,
+                        camera: scene.PerspectiveCamera(
+                          position: vm.Vector3(
+                            math.sin(angle) * math.cos(elevation) * distance,
+                            math.sin(elevation) * distance + 1,
+                            math.cos(angle) * math.cos(elevation) * distance,
+                          ),
+                          target: vm.Vector3(0, 1, 0),
+                        ),
+                      ),
               ),
+            ),
+          ),
+          Positioned(
+            right: 12,
+            bottom: 12,
+            child: Column(
+              children: [
+                IconButton.filledTonal(
+                  tooltip: 'Zoom in',
+                  onPressed: () =>
+                      setState(() => distance = (distance / 1.2).clamp(4, 25)),
+                  icon: const Icon(Icons.add),
+                ),
+                IconButton.filledTonal(
+                  tooltip: 'Zoom out',
+                  onPressed: () =>
+                      setState(() => distance = (distance * 1.2).clamp(4, 25)),
+                  icon: const Icon(Icons.remove),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
     return LayoutBuilder(
       builder: (c, b) => b.maxWidth > 700
           ? Row(
               children: [
-                controls,
+                SizedBox(width: 300, child: controls),
                 Expanded(child: viewport),
               ],
             )
           : Column(
               children: [
                 Expanded(child: viewport),
-                SizedBox(height: 220, child: controls),
+                SizedBox(
+                  height: math.min(260, b.maxHeight * .45),
+                  width: double.infinity,
+                  child: controls,
+                ),
               ],
             ),
     );
