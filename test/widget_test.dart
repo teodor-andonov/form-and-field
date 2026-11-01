@@ -1,8 +1,36 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:atelier_workspace/main.dart';
 
 void main() {
+  testWidgets('Drawing painter cannot cover controls outside its bounds', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      canvas.drawRect(
+        const Rect.fromLTWH(0, 0, 100, 100),
+        Paint()..color = const Color(0xffff0000),
+      );
+      canvas.translate(25, 25);
+      DrawingPainter(
+        [],
+        null,
+        1,
+        Offset.zero,
+      ).paint(canvas, const Size(50, 50));
+      final image = await recorder.endRecording().toImage(100, 100);
+      final bytes = (await image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      ))!.buffer.asUint8List();
+      final outside = (5 * 100 + 5) * 4;
+      expect(bytes.sublist(outside, outside + 4), [255, 0, 0, 255]);
+      image.dispose();
+    });
+  });
+
   testWidgets('Landing page exposes the creative workspace', (tester) async {
     await tester.pumpWidget(const Atelier());
     await tester.pumpAndSettle();

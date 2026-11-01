@@ -983,7 +983,9 @@ class DrawingPainter extends CustomPainter {
   DrawingPainter(this.strokes, this.selected, this.zoom, this.pan);
   @override
   void paint(Canvas c, Size size) {
-    c.drawColor(const Color(0xffe9ece6), BlendMode.src);
+    c.save();
+    c.clipRect(Offset.zero & size);
+    c.drawRect(Offset.zero & size, Paint()..color = const Color(0xffe9ece6));
     final grid = Paint()
       ..color = const Color(0xffdce1d9)
       ..strokeWidth = 1;
@@ -1033,6 +1035,7 @@ class DrawingPainter extends CustomPainter {
         );
       }
     }
+    c.restore();
   }
 
   @override
@@ -1141,64 +1144,137 @@ class _ArchitectureState extends State<Architecture> {
   );
   @override
   Widget build(BuildContext c) {
+    final compact = MediaQuery.sizeOf(c).width <= 700;
+    Widget compactSlider(
+      String label,
+      double value,
+      double min,
+      double max,
+      ValueChanged<double> change,
+    ) => SizedBox(
+      height: 42,
+      child: Row(
+        children: [
+          SizedBox(width: 54, child: Text(label)),
+          Expanded(
+            child: Slider(
+              value: value,
+              min: min,
+              max: max,
+              onChanged: model == null
+                  ? null
+                  : (v) {
+                      change(v);
+                      regenerate();
+                    },
+            ),
+          ),
+          SizedBox(
+            width: 45,
+            child: Text(value.toStringAsFixed(1), textAlign: TextAlign.right),
+          ),
+        ],
+      ),
+    );
     final controls = Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(compact ? 10 : 20),
       color: Colors.white,
       child: ListView(
         shrinkWrap: true,
-        children: [
-          const Tag('PARAMETRIC STUDY'),
-          const SizedBox(height: 12),
-          const Text(
-            'The pavilion',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Adjust the dimensions to reshape the model.',
-            style: TextStyle(color: muted, height: 1.4),
-          ),
-          const SizedBox(height: 25),
-          slider('Width', w, 2, 7, (v) => w = v),
-          slider('Depth', d, 2, 6, (v) => d = v),
-          slider('Height', h, 2, 6, (v) => h = v),
-          const SizedBox(height: 15),
-          const Text(
-            'MATERIAL',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: const Text('Limestone'),
-                selected: material == 0,
-                onSelected: (_) {
-                  material = 0;
-                  regenerate();
-                },
-              ),
-              ChoiceChip(
-                label: const Text('Sage'),
-                selected: material == 1,
-                onSelected: (_) {
-                  material = 1;
-                  regenerate();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 25),
-          const Text(
-            'Drag to orbit · pinch or scroll to zoom',
-            style: TextStyle(color: muted, fontSize: 12),
-          ),
-        ],
+        children: compact
+            ? [
+                const Text(
+                  'PAVILION  ·  DIMENSIONS (m)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: .6,
+                  ),
+                ),
+                compactSlider('Width', w, 2, 7, (v) => w = v),
+                compactSlider('Depth', d, 2, 6, (v) => d = v),
+                compactSlider('Height', h, 2, 6, (v) => h = v),
+                Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    const Text('Material'),
+                    ChoiceChip(
+                      label: const Text('Limestone'),
+                      selected: material == 0,
+                      onSelected: model == null
+                          ? null
+                          : (_) {
+                              material = 0;
+                              regenerate();
+                            },
+                    ),
+                    ChoiceChip(
+                      label: const Text('Sage'),
+                      selected: material == 1,
+                      onSelected: model == null
+                          ? null
+                          : (_) {
+                              material = 1;
+                              regenerate();
+                            },
+                    ),
+                  ],
+                ),
+              ]
+            : [
+                const Tag('PARAMETRIC STUDY'),
+                const SizedBox(height: 12),
+                const Text(
+                  'The pavilion',
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Adjust the dimensions to reshape the model.',
+                  style: TextStyle(color: muted, height: 1.4),
+                ),
+                const SizedBox(height: 25),
+                slider('Width', w, 2, 7, (v) => w = v),
+                slider('Depth', d, 2, 6, (v) => d = v),
+                slider('Height', h, 2, 6, (v) => h = v),
+                const SizedBox(height: 15),
+                const Text(
+                  'MATERIAL',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Limestone'),
+                      selected: material == 0,
+                      onSelected: (_) {
+                        material = 0;
+                        regenerate();
+                      },
+                    ),
+                    ChoiceChip(
+                      label: const Text('Sage'),
+                      selected: material == 1,
+                      onSelected: (_) {
+                        material = 1;
+                        regenerate();
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 25),
+                const Text(
+                  'Drag to orbit · pinch or scroll to zoom',
+                  style: TextStyle(color: muted, fontSize: 12),
+                ),
+              ],
       ),
     );
     final viewport = Container(
@@ -1288,7 +1364,7 @@ class _ArchitectureState extends State<Architecture> {
               children: [
                 Expanded(child: viewport),
                 SizedBox(
-                  height: math.min(260, b.maxHeight * .45),
+                  height: math.min(235, b.maxHeight * .48),
                   width: double.infinity,
                   child: controls,
                 ),
