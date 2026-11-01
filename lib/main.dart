@@ -102,27 +102,33 @@ class Header extends StatelessWidget {
     ),
     child: Row(
       children: [
-        InkWell(
-          onTap: () => c.go('/'),
-          child: const Row(
-            children: [
-              CircleAvatar(
-                radius: 15,
-                backgroundColor: ink,
-                child: Icon(Icons.auto_awesome, size: 16, color: accent),
+        Expanded(
+          child: InkWell(
+            onTap: () => c.go('/'),
+            child: const FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: 15,
+                    backgroundColor: ink,
+                    child: Icon(Icons.auto_awesome, size: 16, color: accent),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'FORM & FIELD',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 10),
-              Text(
-                'FORM & FIELD',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-        const Spacer(),
         if (MediaQuery.sizeOf(c).width > 950) ...[
           nav(c, 'Home', '/'),
           nav(c, 'Applications', '/apps'),

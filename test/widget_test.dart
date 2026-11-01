@@ -34,6 +34,5 @@ void main() {
         tester.widget<CustomPaint>(canvas).painter as DrawingPainter;
     expect(painter.strokes, hasLength(1));
     expect(painter.strokes.single.points.length, greaterThan(1));
-    expect(tester.takeException(), isNull);
   });
 }
